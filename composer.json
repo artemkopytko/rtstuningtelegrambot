@@ -1,0 +1,18 @@
+{
+    "name": "rtstuning/rtstunting",
+    "type": "project",
+    "description": "RTS Tuning bot",
+    "keywords": ["telegram", "bot", "example"],
+    "license": "MIT",
+    "homepage": "https://rtstuning.com",
+    "authors": [
+        {
+            "name": "Artem Kopytko",
+            "homepage": "https://artemkopytko.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "longman/telegram-bot": "*"
+    }
+}

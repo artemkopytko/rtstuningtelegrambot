@@ -1,0 +1,11 @@
+composer.phar
+/vendor/
+/vendor/*
+/vendor*
+composer.lock
+hook.php
+set.php
+getUpdatesCLI.php
+unset.php
+manager.php
+cron.php
