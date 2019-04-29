@@ -65,15 +65,25 @@ class GenericmessageCommand extends SystemCommand
 	    $text   = trim($this->getMessage()->getText(true));
 
 	    if ($text === 'О нас') {
-		    return $this->getTelegram()->executeCommand('aboutus');
+		    return $this->getTelegram()->executeCommand('about');
 	    } elseif ($text === 'Связаться') {
 		    return $this->getTelegram()->executeCommand('contact');
+	    } elseif ($text === 'Услуги') {
+		    return $this->getTelegram()->executeCommand('services');
+	    } elseif ($text === 'Чип-тюнинг') {
+		    return $this->getTelegram()->executeCommand('serviceChip');
+	    } elseif ($text === 'Тюнинг авто') {
+		    return $this->getTelegram()->executeCommand('serviceTuning');
+	    } elseif ($text === 'Комплексная переработка') {
+		    return $this->getTelegram()->executeCommand('serviceComplex');
 	    } elseif ($text === '📝 Записаться') {
 		    return $this->getTelegram()->executeCommand('booking');
 	    } elseif ($text === 'Отменить ❌') {
 		    return $this->getTelegram()->executeCommand('cancelBooking');
 	    } elseif ($text === '🔙 Назад') {
 		    return $this->getTelegram()->executeCommand('start');
+	    } elseif ($text === '🔙 к услугам') {
+		    return $this->getTelegram()->executeCommand('services');
 	    }
 
         //If a conversation is busy, execute the conversation command after handling the message

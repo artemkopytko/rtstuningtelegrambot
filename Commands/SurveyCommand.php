@@ -215,25 +215,25 @@ class SurveyCommand extends UserCommand
                 $notes['photo_id'] = $photo->getFileId();
 
             // no break
-            case 6:
-                if ($message->getContact() === null) {
-                    $notes['state'] = 6;
-                    $this->conversation->update();
-
-                    $data['reply_markup'] = (new Keyboard(
-                        (new KeyboardButton('Share Contact'))->setRequestContact(true)
-                    ))
-                        ->setOneTimeKeyboard(true)
-                        ->setResizeKeyboard(true)
-                        ->setSelective(true);
-
-                    $data['text'] = 'Share your contact information:';
-
-                    $result = Request::sendMessage($data);
-                    break;
-                }
-
-                $notes['phone_number'] = $message->getContact()->getPhoneNumber();
+//            case 6:
+//                if ($message->getContact() === null) {
+//                    $notes['state'] = 6;
+//                    $this->conversation->update();
+//
+//                    $data['reply_markup'] = (new Keyboard(
+//                        (new KeyboardButton('Share Contact'))->setRequestContact(true)
+//                    ))
+//                        ->setOneTimeKeyboard(true)
+//                        ->setResizeKeyboard(true)
+//                        ->setSelective(true);
+//
+//                    $data['text'] = 'Share your contact information:';
+//
+//                    $result = Request::sendMessage($data);
+//                    break;
+//                }
+//
+//                $notes['phone_number'] = $message->getContact()->getPhoneNumber();
 
             // no break
             case 7:

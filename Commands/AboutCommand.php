@@ -11,11 +11,11 @@ namespace Longman\TelegramBot\Commands\UserCommands;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Request;
 
-class AboutUsCommand extends UserCommand
+class AboutCommand extends UserCommand
 {
-	protected $name = 'aboutus';                      // Your command's name
-	protected $description = 'A command for About Us'; // Your command description
-	protected $usage = '/aboutus';                    // Usage of your command
+	protected $name = 'about';                      // Your command's name
+	protected $description = 'A command for About'; // Your command description
+	protected $usage = '/about';                    // Usage of your command
 	protected $version = '1.0.0';                  // Version of your command
 
 

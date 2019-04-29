@@ -57,7 +57,11 @@ class GenericCommand extends SystemCommand
 
         $data = [
             'chat_id' => $chat_id,
-            'text'    => 'Command /' . $command . ' not found.. :(',
+            'text'    => 'Такая команда не найдена.. :(',
+            'reply_markup' => array(
+	            'keyboard' => array(array('О нас', 'Услуги', 'Связаться')),
+	            'one_time_keyboard' => true,
+	            'resize_keyboard' => true)
         ];
 
         return Request::sendMessage($data);
