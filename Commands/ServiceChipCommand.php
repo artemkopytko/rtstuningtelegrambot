@@ -32,7 +32,7 @@ class ServiceChipCommand extends UserCommand
 			'parse_mode' => 'HTML',
 			'text'    => $text,
 			'reply_markup' => array(
-				'keyboard' => array(array('🔙 к услугам', 'Как это происходит?', 'Чип-тюнинг для моего авто')),
+				'keyboard' => array(array('🔙 к услугам', 'Как это происходит?', 'Просчитать')),
 				'one_time_keyboard' => true,
 				'resize_keyboard' => true)
 		];

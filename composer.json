@@ -13,6 +13,7 @@
         }
     ],
     "require": {
-        "longman/telegram-bot": "*"
+        "longman/telegram-bot": "*",
+        "php-telegram-bot/inline-keyboard-pagination": "^1.0.0"
     }
 }
