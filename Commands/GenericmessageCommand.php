@@ -76,8 +76,10 @@ class GenericmessageCommand extends SystemCommand
 		    return $this->getTelegram()->executeCommand('serviceChipCount');
 	    } elseif ($text === 'Тюнинг авто') {
 		    return $this->getTelegram()->executeCommand('serviceTuning');
-	    } elseif ($text === 'Комплексная переработка') {
+	    } elseif ($text === 'Дополнительные услуги') {
 		    return $this->getTelegram()->executeCommand('serviceComplex');
+	    } elseif ($text === 'Ещё') {
+		    return $this->getTelegram()->executeCommand('serviceComplexMore');
 	    } elseif ($text === '📝 Записаться') {
 		    return $this->getTelegram()->executeCommand('booking');
 	    } elseif ($text === 'Отменить ❌') {

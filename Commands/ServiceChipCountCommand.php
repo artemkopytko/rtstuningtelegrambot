@@ -30,10 +30,12 @@ class Mark {
 
 class Model {
 	public $name = "";
+	public $lowerName = "";
 	public $href = "";
 
-	public function __construct ( $name, $href ) {
+	public function __construct ( $name, $lowerName, $href ) {
 		$this->name = $name;
+		$this->lowerName = $lowerName;
 		$this->href = $href;
 	}
 }
@@ -131,7 +133,7 @@ class ServiceChipCountCommand extends UserCommand
 		$html = file_get_html('https://avtomarket.ru/catalog/');
 		$marks = [];
 		$marksNames = [];
-		$excludedMarks = ['BMW'];
+		$excludedMarks = ['AC Cars','ARO','Alpina','Asia', 'Aurus','BYD','Beijing','Brilliance','Bristol','Bugatti','Buick','Caterham','Chance','Changan','Changfeng','Chery','DS','DW Hower','Dacia','Dadi','Daewoo','Daihatsu','Daimler','Datsun','Derways','Dong Feng','FAW','FSO','Foton','Geely','Gillet','Great Wall','Hafei','Haima','Haval','Hawtai','Holden','Huanghai','Hurtan','Innocenti','Iran Khodro','Isuzu','JAC','JMC','LDV','Lancia','Liebao','Lifan','Luxgen','Mahindra','Marcos','Maruti','Mercury','Mitsuoka','Morgan','Noble','Packard','Plymouth','Proton','Ravon','Rover','Saab','Santana','Saturn','ShuangHuan','Ssang Yong','TVR','Talbot','Tata','Tesla','Tianma','Tianye','Trabant','Venturi','Vortex','Wartburg','Xinkai','ZX','Zotye','ВАЗ','ВИС','ГАЗ','Донинвест','ЗАЗ','ЗИЛ','ИЖ','Москвич','СеАЗ','ТагАЗ','УАЗ'];
 
 		foreach($html->find('#name-list li a') as $e) {
 
@@ -216,10 +218,11 @@ class ServiceChipCountCommand extends UserCommand
 				foreach($html->find('#name-list li a') as $e) {
 
 					$name = mb_convert_encoding($e->innertext,'utf-8','windows-1251');
+					$lowerName = strtolower(mb_convert_encoding($e->innertext, 'utf-8', 'windows-1251'));
 					$href = mb_convert_encoding(str_replace("/catalog/", "", $e->href),'UTF-8','Windows-1251');
 
 					$name = str_replace($notes['mark'].' ','',$name);
-					$model = new Model($name, $href);
+					$model = new Model($name, $lowerName, $href);
 
 					$models[] = $model;
 					$modelsNames[] = strtolower($name);
@@ -255,7 +258,15 @@ class ServiceChipCountCommand extends UserCommand
 					break;
 				}
 
-				$notes['model'] = ucfirst($text);
+				$tmpModelName = '';
+
+				foreach($models as $model) {
+					if($model->lowerName == $text) {
+						$notes['model'] = $model->name;
+					}
+				}
+
+//				$notes['model'] = ucfirst($text);
 
 //				$data['text'] = 'модель ОК - '.$notes['model'];
 //				$result = Request::sendMessage($data);

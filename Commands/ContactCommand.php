@@ -26,19 +26,19 @@ class ContactCommand extends UserCommand
 		$chat_id = $message->getChat()->getId();   // Get the current Chat ID
 
 		$text = "
-🌐 Facebook👉 <a href='#'>@rtstuning</a>
-📸 Instagram👉 <a href='#'>@rtstuning</a>
-📩 Email👉 SUPPORT@RTSTUNING.COM
-📩 Email👉 RTSTUNING2@GMAIL.COM
-📱 Мобильный: +380 (50) 316 39 88
-📱 Мобильный: +380 (67) 393 74 14
+🌐 Facebook👉 <a href='https://www.facebook.com/rtstuningcom/'>rtstuning</a>
+📸 Instagram👉 <a href='https://instagram.com/rtstuning'>rtstuning</a>
+📩 Email👉 support@rtstuning.com
+📱 Мобильные: +380 (50) 316 39 88
+📌 Telgram, Viber, Whatsapp: +380 (67) 393 74 14
 💻 Сайт: https://rtstuning.com/
 		";
 
 		$data = [                                  // Set up the new message data
 			'chat_id' => $chat_id,                 // Set Chat ID to send the message to
 			'parse_mode' => 'HTML',
-			'text'    => $text
+			'text'    => $text,
+			'disable_web_page_preview' => true
 		];
 
 
