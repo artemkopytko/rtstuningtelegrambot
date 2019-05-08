@@ -80,7 +80,7 @@ class GenericmessageCommand extends SystemCommand
 		    return $this->getTelegram()->executeCommand('serviceComplex');
 	    } elseif ($text === 'Ещё') {
 		    return $this->getTelegram()->executeCommand('serviceComplexMore');
-	    } elseif ($text === '📝 Записаться') {
+	    } elseif ($text === '📝 Записаться' || $text === 'Нет, не мой') {
 		    return $this->getTelegram()->executeCommand('booking');
 	    } elseif ($text === 'Отменить ❌') {
 		    return $this->getTelegram()->executeCommand('cancelBooking');
@@ -90,7 +90,7 @@ class GenericmessageCommand extends SystemCommand
 		    return $this->getTelegram()->executeCommand('services');
 	    } elseif ($text === 'Посмотреть еще') {
 		    return $this->getTelegram()->executeCommand('serviceChip');
-	    } elseif ($text === 'Понятно, спасибо 😊') {
+	    } elseif ($text === 'Нет, спасибо 😊') {
 		    return $this->getTelegram()->executeCommand('thanks');
 	    } elseif ($text === 'Отмена ❌') {
 		    return $this->getTelegram()->executeCommand('cancelChip');

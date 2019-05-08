@@ -68,7 +68,7 @@ class BookingCommand extends UserCommand
 		//Every time a step is achieved the track is updated
 		switch ($state) {
 			case 0:
-				if ($text === '' || $text=='📝 Записаться') {
+				if ($text === '' || $text=='📝 Записаться' || $text == 'Нет, не мой') {
 					$notes['state'] = 0;
 					$this->conversation->update();
 
@@ -154,8 +154,6 @@ class BookingCommand extends UserCommand
 				];
 
 				$data['text']        = $out_text;
-				$data['disable_notification'] = true;
-				$data['reply_markup'] = Keyboard::remove(['selective' => true]);
 				$data['caption']      = $out_text;
 
 

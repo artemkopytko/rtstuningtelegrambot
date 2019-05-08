@@ -417,25 +417,37 @@ class ServiceChipCountCommand extends UserCommand
 					$notes['state'] = 3;
 					$this->conversation->update();
 
-					$data['text'] = 'Вот список модификаций '.$notes['gen'];
-					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
-						->setResizeKeyboard(true)
-						->setOneTimeKeyboard(false)
-						->setSelective(true);
-					$result = Request::sendMessage($data);
+					if(!empty($gensString)) {
+						$data['text']         = 'Вот список модификаций ' . $notes['gen'];
+						$data['reply_markup'] = ( new Keyboard( [ 'Отмена ❌' ] ) )
+							->setResizeKeyboard( true )
+							->setOneTimeKeyboard( false )
+							->setSelective( true );
+						$result               = Request::sendMessage( $data );
 
-					$data['text'] = $gensString;
+						$data['text'] = $gensString;
 
-					$result = Request::sendMessage($data);
+						$result = Request::sendMessage($data);
 
-					$data['text'] = 'Введите <b>индекс</b> модификации '.$notes['gen'].PHP_EOL.'К примеру: <em>1</em>';
-					if ($text !== '') {
 						$data['text'] = 'Введите <b>индекс</b> модификации '.$notes['gen'].PHP_EOL.'К примеру: <em>1</em>';
+						if ($text !== '') {
+							$data['text'] = 'Введите <b>индекс</b> модификации '.$notes['gen'].PHP_EOL.'К примеру: <em>1</em>';
+						}
+
+						$data['parse_mode'] = 'HTML';
+
+						$result = Request::sendMessage($data);
+					} else {
+						$data['text']         = 'К сожалению, в нашей базе еще нет данных о ' . $notes['gen'].PHP_EOL;
+						$data['reply_markup'] = ( new Keyboard( [ 'Отмена ❌' ] ) )
+							->setResizeKeyboard( true )
+							->setOneTimeKeyboard( false )
+							->setSelective( true );
+						$result = Request::sendMessage($data);
+						$this->conversation->stop();
 					}
 
-					$data['parse_mode'] = 'HTML';
 
-					$result = Request::sendMessage($data);
 					break;
 				}
 
@@ -457,6 +469,7 @@ class ServiceChipCountCommand extends UserCommand
 
 				$car = new Car;
 
+				$notes['state'] = 4;
 				$car->mark = 'Марка авто: '.$notes['mark'];
 				$car->model = 'Модель авто: '.$notes['model'];
 				$car->modification = $notes['modName'];
@@ -484,9 +497,9 @@ class ServiceChipCountCommand extends UserCommand
 //				$acceleration = floatval($car->acceleration)+ 0.2;
 
 				$data['text'] = 'Исходные характеристики '.$car->modification.PHP_EOL;
-				if(isset($car->horsePower))$data['text'] .= 'Мощность, л.с.: '.$car->horsePower.PHP_EOL;
-				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: '.$car->fuelConsumption.PHP_EOL;
-				if(isset($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: '.$car->acceleration.PHP_EOL;
+				if(!empty($car->horsePower))$data['text'] .= 'Мощность, л.с.: '.$car->horsePower.PHP_EOL;
+				if(!empty($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: '.$car->fuelConsumption.PHP_EOL;
+				if(!empty($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: '.$car->acceleration.PHP_EOL;
 				$data['parse_mode'] = 'HTML';
 
 				$result = Request::sendMessage($data);
@@ -498,11 +511,13 @@ $accelerationNewLeast = $car->acceleration-0.5;
 $accelerationNewGreatest = $car->acceleration-0.7;
 
 				$data['text'] = 'Чип-тюнинг позволят увеличить мощность двигателя на 8-12% в случае атомосферного мотора, и на <b>20-30%</b> в случае наличия турбины или компрессора. Вот примерные харакетристики вашего авто после чип-тюнинга:'.PHP_EOL.PHP_EOL;
-				if(isset($car->horsePower))$data['text'] .= 'Мощность, л.с.: <b>'.$horseNewLeast.'-'.$horseNewGreatest.'</b>'.PHP_EOL;
-				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: <b>'.$consumptionNew.'</b>'.PHP_EOL;
-				if(isset($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: <b>'.$accelerationNewLeast.'-'.$accelerationNewGreatest.'</b>'.PHP_EOL;
+				if(!empty($car->horsePower))$data['text'] .= 'Мощность, л.с.: <b>'.$horseNewLeast.'-'.$horseNewGreatest.'</b>'.PHP_EOL;
+				if(!empty($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: <b>'.$consumptionNew.'</b>'.PHP_EOL;
+				if(!empty($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: <b>'.$accelerationNewLeast.'-'.$accelerationNewGreatest.'</b>'.PHP_EOL;
+
+
 				$data['parse_mode'] = 'HTML';
-				$data['reply_markup'] = (new Keyboard(['Посмотреть еще','✏️ Записаться','Понятно, спасибо 😊' ]))
+				$data['reply_markup'] = (new Keyboard(['Посмотреть еще','✏️ Записаться','Нет, спасибо 😊' ]))
 					->setResizeKeyboard(true)
 					->setOneTimeKeyboard(false)
 					->setSelective(true);
@@ -510,68 +525,122 @@ $accelerationNewGreatest = $car->acceleration-0.7;
 
 				$result = Request::sendMessage($data);
 
+				$text = '';
 
-				if ($text === '✏️ Записаться') {
-					$notes['state'] = 4;
+			case 5:
+
+				if ($text === '' || empty($text) || !in_array($text,['Понятно, спасибо 😊','Посмотреть еще','✏️ Записаться'])) {
+//					$data['text'] = 'Получил на вход: '.$text;
+//					$res = Request::sendMessage($data);
+					$notes['state'] = 5;
 					$this->conversation->update();
 
-					$data['text'] = 'Это ваш автомобиль?';
-					$data['text'] .= $car->mark .' '. $car->model;
-					$data['reply_markup'] = (new Keyboard(['Да','Нет']))
+
+					$data['parse_mode'] = 'HTML';
+					$data['text'] = 'Записаться за чип-тюнинг?';
+					$data['reply_markup'] = (new Keyboard(['Посмотреть еще','✏️ Записаться','Нет, спасибо 😊' ]))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
+
+
+					$result = Request::sendMessage($data);
+
+					//case 5:
+break;
+
+				}
+				$text = '';
+			case 6:
+				if ($text === '' || !in_array($text,['Да, мой','Нет, не мой']) ) {
+//					$data['text'] = 'DEBUG: '.$text;
+					$notes['state'] = 6;
+					$this->conversation->update();
+
+					$data['text'] = $notes['mark'].' '. $notes['model'].' - ваш автомобиль?';
+					$data['reply_markup'] = (new Keyboard(['Да, мой','Нет, не мой']))
 						->setResizeKeyboard(true)
 						->setOneTimeKeyboard(false)
 						->setSelective(true);
 					$result = Request::sendMessage($data);
-
-
-					$data['text'] = 'Телефон и имя?';
-
-					$data['parse_mode'] = 'HTML';
-
-					$result = Request::sendMessage($data);
-					break;
-				} else {
-					$data['text'] = 'Lorem';
-					$result = Request::sendMessage($data);
-					//case 5:
-
-
-					//	$this->conversation->update();
-					//	$out_text = 'Новая заявка с телеграм бота:' . PHP_EOL;
-					//	unset($notes['state']);
-					//	foreach ($notes as $k => $v) {
-					//		$out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
-					//	}
-
-//				$data = [
-//					'chat_id' => '-1001150647628',
-//				];
-
-					//	$data['text']        = $out_text;
-					//	$data['disable_notification'] = true;
-					//	$data['reply_markup'] = Keyboard::remove(['selective' => true]);
-					//	$data['caption']      = $out_text;
-
-
-					$this->conversation->stop();
-
-					//	$res = Request::sendMessage($data);
-
-					//	$data = [
-					//		'chat_id' => $chat_id,
-					//	];
-
-					//	$data['text']        = '🔧 Спасибо! Ваша заявка успешно отправлена';
-					//	$data['reply_markup'] = (new Keyboard(['О нас', 'Услуги', 'Связаться']))
-					//		->setResizeKeyboard(true)
-					//		->setOneTimeKeyboard(true)
-					//		->setSelective(true);
-
-
-					//$res = Request::sendMessage($data);
-
 					break;
 				}
+				$text = '';
+
+			case 7:
+				if($text === '' || !is_string($text)) {
+//					$data['text'] = 'DEBUG: '.$text;
+					$result = Request::sendMessage($data);
+					$notes['state'] = 7;
+					$this->conversation->update();
+
+					$data['text'] = 'Хорошо! Как вас зовут?';
+					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
+					$result = Request::sendMessage($data);
+					break;
+				}
+				$notes['name'] = $text;
+
+				$text = '';
+//				$notes['Телефон'] = $text;
+
+			case 8:
+				if($text == '' || !is_string($text) || strlen($text) < 10) {
+//					$data['text'] = 'DEBUG: '.$text;
+					$result = Request::sendMessage($data);
+
+					$notes['state'] = 8;
+					$this->conversation->update();
+
+					$data['text'] = $notes['name'].', подскажите, пожалуйста, ваш номер телефона';
+					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
+					$result = Request::sendMessage($data);
+					break;
+				}
+				$notes['phone'] = $text;
+
+			case 9:
+
+				$data['text']        = '🔧 Спасибо! Ваша заявка успешно отправлена';
+				$data['reply_markup'] = (new Keyboard(['О нас', 'Услуги', 'Связаться']))
+					->setResizeKeyboard(true)
+					->setOneTimeKeyboard(true)
+					->setSelective(true);
+
+				$res = Request::sendMessage($data);
+
+
+				$out_text = 'Новая заявка на чип-тюнинг:' . PHP_EOL;
+				$out_text .= 'Имя: '.$notes['name'].PHP_EOL;
+				$out_text .= 'Телефон: '.$notes['phone'].PHP_EOL;
+				$out_text .= 'Авто: '.$notes['modName'];
+
+				unset($notes['state']);
+//				foreach ($notes as $k => $v) {
+//					$out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
+//				}
+
+
+				$data = [
+					'chat_id' => '-1001150647628',
+				];
+
+				$data['text']        = $out_text;
+				$data['caption']      = $out_text;
+
+				$res = Request::sendMessage($data);
+
+				$this->conversation->stop();
+
+				break;
+
+
 		}
 
 		return $result;
