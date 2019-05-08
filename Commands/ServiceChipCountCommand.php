@@ -22,7 +22,8 @@ class Mark {
 	public $name = "";
 	public $href = "";
 
-	public function __construct ( $name, $href ) {
+	public function __construct ( $name, $lowerName, $href ) {
+		$this->lowerName = $lowerName;
 		$this->name = $name;
 		$this->href = $href;
 	}
@@ -124,9 +125,13 @@ class ServiceChipCountCommand extends UserCommand
 
 		//cache data from the tracking session if any
 		$state = 0;
+//		$notes['state'] = 1;
+//		unset($notes['model']);
+
 		if (isset($notes['state'])) {
 			$state = $notes['state'];
 		}
+
 
 		$result = Request::emptyResponse();
 
@@ -140,7 +145,7 @@ class ServiceChipCountCommand extends UserCommand
 			$name = mb_convert_encoding($e->innertext,'utf-8','windows-1251');
 			$href = mb_convert_encoding(str_replace("/catalog/", "", $e->href),'UTF-8','Windows-1251');
 
-			$mark = new Mark($name, $href);
+			$mark = new Mark($name, strtolower($name), $href);
 
 			array_push($marks,$mark);
 		}
@@ -195,10 +200,12 @@ class ServiceChipCountCommand extends UserCommand
 					break;
 				}
 
-				$notes['mark'] = ucfirst($text);
+//				$notes['mark'] = ucfirst($text);
+
 
 				foreach ($marks as $key => $mark) {
-					if($mark->name == $notes['mark']) {
+					if($mark->lowerName == strtolower($text)) {
+						$notes['mark'] = $mark->name;
 						$notes['mark_link'] = $mark->href;
 					}
 				}
@@ -225,7 +232,7 @@ class ServiceChipCountCommand extends UserCommand
 					$model = new Model($name, $lowerName, $href);
 
 					$models[] = $model;
-					$modelsNames[] = strtolower($name);
+					$modelsNames[] = strtolower(str_replace($notes['mark'].' ','',$name));
 				}
 
 				$modelsList = '';
@@ -241,7 +248,10 @@ class ServiceChipCountCommand extends UserCommand
 					$this->conversation->update();
 
 					$data['text'] = 'Вот список поддерживаемых моделей '.$notes['mark'];
-
+					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
 					$result = Request::sendMessage($data);
 
 					$data['text'] = $modelsList;
@@ -258,29 +268,32 @@ class ServiceChipCountCommand extends UserCommand
 					break;
 				}
 
-				$tmpModelName = '';
-
 				foreach($models as $model) {
-					if($model->lowerName == $text) {
+//					$data['text'] .= $model->lowerName;
+					if($model->lowerName == strtolower($notes['mark']).' '.strtolower($text)) {
+//						$data['text'] .= $model->lowerName;
+//						$data['text'] = 'Нашел, модель: '.strtolower($text).' norm: '.$model->name.' link: '.$model->href;
+//						$result = Request::sendMessage($data);
 						$notes['model'] = $model->name;
+						$notes['model_link'] = $model->href;
 					}
 				}
-
+//				$result = Request::sendMessage($data);
 //				$notes['model'] = ucfirst($text);
 
 //				$data['text'] = 'модель ОК - '.$notes['model'];
 //				$result = Request::sendMessage($data);
 
 
-				foreach ($models as $key => $model) {
-					if(ucfirst($text) == $model->name) {
+//				foreach ($models as $key => $model) {
+//					if(ucfirst($text) == $model->name) {
 
 //						$data['text'] = 'НАЙДЕНА МОДЕЛЬ, ССЫЛКА: '.$model->href;
 //						$result = Request::sendMessage($data);
 
-						$notes['model_link'] = $model->href;
-					}
-				}
+//						$notes['model_link'] = $model->href;
+//					}
+//				}
 
 				$text         = '';
 
@@ -330,7 +343,10 @@ class ServiceChipCountCommand extends UserCommand
 					$this->conversation->update();
 
 					$data['text'] = 'Вот список поколений '.$notes['mark'].' '.$notes['model'];
-
+					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
 					$result = Request::sendMessage($data);
 
 					$data['text'] = $modelsTypesList;
@@ -402,7 +418,10 @@ class ServiceChipCountCommand extends UserCommand
 					$this->conversation->update();
 
 					$data['text'] = 'Вот список модификаций '.$notes['gen'];
-
+					$data['reply_markup'] = (new Keyboard(['Отмена ❌']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
 					$result = Request::sendMessage($data);
 
 					$data['text'] = $gensString;
@@ -441,6 +460,7 @@ class ServiceChipCountCommand extends UserCommand
 				$car->mark = 'Марка авто: '.$notes['mark'];
 				$car->model = 'Модель авто: '.$notes['model'];
 				$car->modification = $notes['modName'];
+				$this->conversation->update();
 
 				foreach($html->find('ul.techd') as $ul) {
 					foreach($ul->find('li') as $li) {
@@ -451,8 +471,9 @@ class ServiceChipCountCommand extends UserCommand
 							$car->horsePower = $div->next_sibling()->innertext;
 						} elseif (strpos(mb_convert_encoding($div,'utf-8','windows-1251'), 'Марка топлива') !== false) {
 							$car->fuelType = mb_convert_encoding($div->next_sibling()->innertext,'utf-8','windows-1251');
-						} elseif (strpos(mb_convert_encoding($div,'utf-8','windows-1251'), 'Расход топлива (смешанный цикл)') !== false) {
+						} elseif (strpos(mb_convert_encoding($div,'utf-8','windows-1251'), 'Расход топлива (в городе)') !== false) {
 							$car->fuelConsumption = $div->next_sibling()->innertext;
+							$car->fuelConsumption = $car->fuelConsumption * 1.1;
 						} elseif (strpos(mb_convert_encoding($div,'utf-8','windows-1251'), 'Время разгона до 100 км/ч') !== false) {
 							$car->acceleration = $div->next_sibling()->innertext;
 						}
@@ -464,7 +485,7 @@ class ServiceChipCountCommand extends UserCommand
 
 				$data['text'] = 'Исходные характеристики '.$car->modification.PHP_EOL;
 				if(isset($car->horsePower))$data['text'] .= 'Мощность, л.с.: '.$car->horsePower.PHP_EOL;
-				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (смешанный цикл), л. на 100 км.: '.$car->fuelConsumption.PHP_EOL;
+				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: '.$car->fuelConsumption.PHP_EOL;
 				if(isset($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: '.$car->acceleration.PHP_EOL;
 				$data['parse_mode'] = 'HTML';
 
@@ -478,10 +499,10 @@ $accelerationNewGreatest = $car->acceleration-0.7;
 
 				$data['text'] = 'Чип-тюнинг позволят увеличить мощность двигателя на 8-12% в случае атомосферного мотора, и на <b>20-30%</b> в случае наличия турбины или компрессора. Вот примерные харакетристики вашего авто после чип-тюнинга:'.PHP_EOL.PHP_EOL;
 				if(isset($car->horsePower))$data['text'] .= 'Мощность, л.с.: <b>'.$horseNewLeast.'-'.$horseNewGreatest.'</b>'.PHP_EOL;
-				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (смешанный цикл), л. на 100 км.: <b>'.$consumptionNew.'</b>'.PHP_EOL;
+				if(isset($car->fuelConsumption))$data['text'] .= 'Расход топлива (в городе), л. на 100 км.: <b>'.$consumptionNew.'</b>'.PHP_EOL;
 				if(isset($car->acceleration))$data['text'] .= 'Время разгона до 100 км/ч, сек.: <b>'.$accelerationNewLeast.'-'.$accelerationNewGreatest.'</b>'.PHP_EOL;
 				$data['parse_mode'] = 'HTML';
-				$data['reply_markup'] = (new Keyboard(['Посмотреть еще','📝 Записаться','Понятно, спасибо 😊' ]))
+				$data['reply_markup'] = (new Keyboard(['Посмотреть еще','✏️ Записаться','Понятно, спасибо 😊' ]))
 					->setResizeKeyboard(true)
 					->setOneTimeKeyboard(false)
 					->setSelective(true);
@@ -490,44 +511,67 @@ $accelerationNewGreatest = $car->acceleration-0.7;
 				$result = Request::sendMessage($data);
 
 
-			//case 5:
+				if ($text === '✏️ Записаться') {
+					$notes['state'] = 4;
+					$this->conversation->update();
+
+					$data['text'] = 'Это ваш автомобиль?';
+					$data['text'] .= $car->mark .' '. $car->model;
+					$data['reply_markup'] = (new Keyboard(['Да','Нет']))
+						->setResizeKeyboard(true)
+						->setOneTimeKeyboard(false)
+						->setSelective(true);
+					$result = Request::sendMessage($data);
 
 
-			//	$this->conversation->update();
-			//	$out_text = 'Новая заявка с телеграм бота:' . PHP_EOL;
-			//	unset($notes['state']);
-			//	foreach ($notes as $k => $v) {
-			//		$out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
-			//	}
+					$data['text'] = 'Телефон и имя?';
+
+					$data['parse_mode'] = 'HTML';
+
+					$result = Request::sendMessage($data);
+					break;
+				} else {
+					$data['text'] = 'Lorem';
+					$result = Request::sendMessage($data);
+					//case 5:
+
+
+					//	$this->conversation->update();
+					//	$out_text = 'Новая заявка с телеграм бота:' . PHP_EOL;
+					//	unset($notes['state']);
+					//	foreach ($notes as $k => $v) {
+					//		$out_text .= PHP_EOL . ucfirst($k) . ': ' . $v;
+					//	}
 
 //				$data = [
 //					'chat_id' => '-1001150647628',
 //				];
 
-			//	$data['text']        = $out_text;
-			//	$data['disable_notification'] = true;
-			//	$data['reply_markup'] = Keyboard::remove(['selective' => true]);
-			//	$data['caption']      = $out_text;
+					//	$data['text']        = $out_text;
+					//	$data['disable_notification'] = true;
+					//	$data['reply_markup'] = Keyboard::remove(['selective' => true]);
+					//	$data['caption']      = $out_text;
 
 
-				$this->conversation->stop();
+					$this->conversation->stop();
 
-			//	$res = Request::sendMessage($data);
+					//	$res = Request::sendMessage($data);
 
-			//	$data = [
-			//		'chat_id' => $chat_id,
-			//	];
+					//	$data = [
+					//		'chat_id' => $chat_id,
+					//	];
 
-			//	$data['text']        = '🔧 Спасибо! Ваша заявка успешно отправлена';
-			//	$data['reply_markup'] = (new Keyboard(['О нас', 'Услуги', 'Связаться']))
-			//		->setResizeKeyboard(true)
-			//		->setOneTimeKeyboard(true)
-			//		->setSelective(true);
+					//	$data['text']        = '🔧 Спасибо! Ваша заявка успешно отправлена';
+					//	$data['reply_markup'] = (new Keyboard(['О нас', 'Услуги', 'Связаться']))
+					//		->setResizeKeyboard(true)
+					//		->setOneTimeKeyboard(true)
+					//		->setSelective(true);
 
 
-				//$res = Request::sendMessage($data);
+					//$res = Request::sendMessage($data);
 
-				break;
+					break;
+				}
 		}
 
 		return $result;
