@@ -56,7 +56,7 @@ class StartCommand extends SystemCommand
         $message = $this->getMessage();
 
         $chat_id = $message->getChat()->getId();
-        $text    = 'Это новый бот для RTS Tuning. Тестовая верия 0.0.4' . PHP_EOL . 'Type /help to see all commands!';
+        $text    = 'Это новый бот для RTS Tuning. Тестовая верия 0.0.5' . PHP_EOL . 'Type /help to see all commands!';
 
         $data = [
             'chat_id' => $chat_id,

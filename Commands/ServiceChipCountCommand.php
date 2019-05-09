@@ -537,7 +537,7 @@ $accelerationNewGreatest = $car->acceleration-0.7;
 
 
 					$data['parse_mode'] = 'HTML';
-					$data['text'] = 'Записаться за чип-тюнинг?';
+					$data['text'] = 'Записаться на чип-тюнинг?';
 					$data['reply_markup'] = (new Keyboard(['Посмотреть еще','✏️ Записаться','Нет, спасибо 😊' ]))
 						->setResizeKeyboard(true)
 						->setOneTimeKeyboard(false)
